@@ -15,7 +15,19 @@ app.get('/', (req, res) => {
   res.sendFile(__dirname + '/views/index.html');
 });
 
+app.route('/api/users')
+  .post(async (req, res) => {
+    const { username } = req.body;
 
+    if(!username) return res.status(400).json({ validationError: "A username is required" });
+
+    try {
+      const user = await User.create({ username });
+      res.json({ username: user.username, _id: user.id });
+    } catch (err) {
+      res.status(500).json({ error: "Unable to create a user" });
+    }
+  });
 
 mongoose.connect(process.env.MONGO_URI, { useNewUrlParser: true, useUnifiedTopology: true })
   .then(() => {
