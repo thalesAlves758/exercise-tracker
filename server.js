@@ -37,6 +37,31 @@ app.route('/api/users')
     }
   });
 
+app.post('/api/users/:_id/exercises', async (req, res) => {
+  
+  const { _id: idUser } = req.params;
+  let user;
+
+  try {
+    user = await User.findById(idUser);
+  } catch (err) {
+    return res.status(500).json({ error: "Unable to find the user with id specified in url params" });
+  }
+
+  const { description, duration } = req.body;
+  let { date } = req.body;
+  date = date ? new Date(date) : new Date();
+
+  user.log.push({ description, duration, date });
+  
+  try {
+    user.save();
+    res.json({ _id: user.id, username: user.username, description, duration, date: date.toDateString() });
+  } catch (err) {
+    res.status(500).json({ error: "Unable to create the exercise" });
+  }
+});
+
 mongoose.connect(process.env.MONGO_URI, { useNewUrlParser: true, useUnifiedTopology: true })
   .then(() => {
     const listener = app.listen(process.env.PORT || 3000, () => {
