@@ -55,8 +55,20 @@ app.post('/api/users/:_id/exercises', async (req, res) => {
   user.log.push({ description, duration, date });
   
   try {
-    user.save();
-    res.json({ _id: user.id, username: user.username, description, duration, date: date.toDateString() });
+    await user.save();
+
+    const lastIndexArray = user.log.length - 1;
+    const currentDescription = user.log[lastIndexArray].description;
+    const currentDuration = user.log[lastIndexArray].duration;
+    const currentDate = user.log[lastIndexArray].date.toDateString();
+
+    res.json({
+      _id: user.id,
+      username: user.username,
+      description: currentDescription,
+      duration: currentDuration,
+      date: currentDate
+    });
   } catch (err) {
     res.status(500).json({ error: "Unable to create the exercise" });
   }
