@@ -76,6 +76,7 @@ app.post('/api/users/:_id/exercises', async (req, res) => {
 
 app.get('/api/users/:_id/logs', async (req, res) => {
   const { _id: idUser } = req.params;
+  const { from, to, limit } = req.query;
   let user;
 
   try {
@@ -84,8 +85,17 @@ app.get('/api/users/:_id/logs', async (req, res) => {
     return res.status(500).json({ error: "Unable to find the user with id specified in url params" });
   }
 
-  const count = user.log.length;
-  const logsUser = user.log.map(item => ({
+  let logsUser;
+
+  if(from && to) logsUser = user.log.filter(item => (new Date(item.date) >= new Date(from) && new Date(item.date) <= new Date(to)));
+  else if(from && !to) logsUser = user.log.filter(item => (new Date(item.date) >= new Date(from)));
+  else if(!from && to) logsUser = user.log.filter(item => (new Date(item.date) <= new Date(to)));
+  else logsUser = user.log;
+
+  if(limit && limit < logsUser.length) logsUser.length = limit;
+
+  const count = logsUser.length;
+  logsUser = logsUser.map(item => ({
     description: item.description,
     duration: item.duration,
     date: item.date.toDateString()
