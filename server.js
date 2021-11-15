@@ -88,7 +88,11 @@ app.get('/api/users/:_id/logs', async (req, res) => {
   let logsUser;
 
   from && (logsUser = user.log.filter(item => (new Date(item.date) >= new Date(from))));
-  to && (logsUser = user.log.filter(item => (new Date(item.date) <= new Date(to))));
+  to && (logsUser && (
+    logsUser = logsUser.filter(item => (new Date(item.date) <= new Date(to)))
+  ) || (
+    logsUser = user.log.filter(item => (new Date(item.date) <= new Date(to)))
+  ));
   !logsUser && (logsUser = user.log);
 
   if(limit && limit < logsUser.length) logsUser.length = limit;
